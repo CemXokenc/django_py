@@ -7,9 +7,24 @@ from messenger.models import Message
 class HomeView(TemplateView):
     template_name = "messenger/home.html"
 
+    def _get_last_viewed_message(self) -> Message | None:
+        if last_viewed_message_id := self.request.session.get("last_viewed_message"):
+            try:
+                return Message.objects.get(id=last_viewed_message_id)
+            except Message.DoesNotExist:
+                self.request.session.pop("last_viewed_message")
+
+                return None
+
+        return None
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["num_messages"] = Message.objects.count()
+
+        if last_viewed_message := self._get_last_viewed_message():
+            context["last_viewed_message"] = last_viewed_message
 
         return context
 
@@ -22,3 +37,11 @@ class MessageListView(ListView):
 # --------------------------Detail View ================================
 class MessageDetailView(DetailView):
     model = Message
+
+    def get_object(self, queryset= None):
+        obj = super().get_object(queryset)
+
+        if obj:
+            self.request.session["last_viewed_message"] = obj.id
+
+        return obj

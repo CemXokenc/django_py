@@ -13,6 +13,14 @@
                 <p class="text-body-secondary mt-2 mb-0">
                     {{ num_messages|pluralize:"message,messages" }} total
                 </p>
+                {% if last_viewed_message %}
+                    <hr class="my-4">
+                    <p class="text-body-secondary small mb-2">Last viewed message</p>
+                    <a href="{% url 'messenger:message-detail' pk=last_viewed_message.pk %}"
+                       class="btn btn-outline-primary btn-sm text-truncate mw-100">
+                        #{{ last_viewed_message.pk }} &mdash; {{ last_viewed_message.text|truncatechars:40 }}
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
